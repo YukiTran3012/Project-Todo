@@ -3,13 +3,13 @@ import TaskForm from './components/TaskForm'
 import Control from './components/Control'
 import TaskList from './components/TaskList'
 import './App.css';
+import {connect} from 'react-redux';
+import * as actions from './actions/index';
 
 class App extends Component{
   constructor(props){
     super(props);
     this.state = {
-      tasks  :  [],//id:unique,B1 : khai báo tasks
-      isDisabled : false,
       taskEditing : null,
       filter : {
         name : '',
@@ -22,19 +22,8 @@ class App extends Component{
       }
     }
   }
-  toggleTab = () => {//thêm tab
-    if(this.state.isDisabled && this.state.taskEditing !== null){
-      this.setState({
-        isDisabled : !this.state.isDisabled,
-        taskEditing :'',
-      })
-    }
-    else{
-      this.setState({
-        isDisabled : !this.state.isDisabled,
-        taskEditing :'',
-      })
-    }
+  onToggleForm = () => {//thêm tab
+    this.props.onToggleForm();
   }
   onCloseForm = () => {
     this.setState({
@@ -42,31 +31,6 @@ class App extends Component{
       taskEditing :'',
       keyword: '',
     })
-  }
-  //thêm data
-  onSubmit = (data) => {
-    // console.log(data);
-    let {tasks} =  this.state;//gọi lại task
-    if(data.id === ""){
-      var rdStr= require("randomstring");
-      var task = {
-        id : rdStr.generate(),
-        name : data.name,
-        status : Boolean(data.status),
-      }
-      tasks.push(task);//push task vào tasks
-    }
-    else{
-      //editing
-      let index = this.findIndex(data.id)
-      tasks[index] = data;
-      // this.onCloseForm();
-    }
-    this.setState({
-      tasks: tasks,
-      taskEditing : '',
-    })
-    localStorage.setItem('tasks',JSON.stringify(tasks));
   }
   onUpdateDataInApp = (id) => {
     // console.log(id);
@@ -142,52 +106,55 @@ class App extends Component{
     // console.log(this.state.sort);
   }
   render(){
-    var {tasks,isDisabled,taskEditing ,filter,keyword,sort} = this.state;// === var tasks = this.state.tasks;
+    var {taskEditing ,
+      // filter,keyword,
+      sort} = this.state;// === var tasks = this.state.tasks;
 
     //Filter
-    if(filter){
-      if(filter.name){
-        tasks = tasks.filter((task)=>{
-          return task.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1;
-        })
-      }
-      // if(filter.status){//đang kiểm tra true --> !== null , !==0  ,.....
-      tasks = tasks.filter((task) => {
-        if(filter.status === -1){
-          return task;
-        }
-        else{
-          return task.status === (filter.status === 1 ? false : true)
-        }
+    // if(filter){
+    //   if(filter.name){
+    //     tasks = tasks.filter((task)=>{
+    //       return task.name.toLowerCase().indexOf(filter.name.toLowerCase()) !== -1;
+    //     })
+    //   }
+    //   // if(filter.status){//đang kiểm tra true --> !== null , !==0  ,.....
+    //   tasks = tasks.filter((task) => {
+    //     if(filter.status === -1){
+    //       return task;
+    //     }
+    //     else{
+    //       return task.status === (filter.status === 1 ? false : true)
+    //     }
         
-      })
-      // }
-    }
-    //search
-    if(keyword){
-      tasks = tasks.filter((task) => {
-        return task.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
-      })
-    }
-    //Sort
-    if(sort.sortBy === 'name') {
-      tasks.sort((task1, task2) => {
-        if(task1.name > task2.name) return (sort.sortValue);
-        else if(task1.name < task2.name) return -(sort.sortValue);
-        else return 0;
-      })
-    }
-    else
-    {
-      tasks.sort((task1, task2) => {
-        if(task1.status > task2.status) return -(sort.sortValue);
-        else if(task1.status < task2.status) return (sort.sortValue);
-        else return 0;
-      })
-    }
+    //   })
+    //   // }
+    // }
+    // //search
+    // if(keyword){
+    //   tasks = tasks.filter((task) => {
+    //     return task.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+    //   })
+    // }
+    // //Sort
+    // if(sort.sortBy === 'name') {
+    //   tasks.sort((task1, task2) => {
+    //     if(task1.name > task2.name) return (sort.sortValue);
+    //     else if(task1.name < task2.name) return -(sort.sortValue);
+    //     else return 0;
+    //   })
+    // }
+    // else
+    // {
+    //   tasks.sort((task1, task2) => {
+    //     if(task1.status > task2.status) return -(sort.sortValue);
+    //     else if(task1.status < task2.status) return (sort.sortValue);
+    //     else return 0;
+    //   })
+    // }
+    var {isDisplayForm} = this.props;
     
-    var elementTabForm = isDisabled 
-        ?  <TaskForm taskEditing={taskEditing} onSubmit={this.onSubmit} onCloseForm={this.onCloseForm}/> : '';
+    var elementTabForm = isDisplayForm 
+        ?  <TaskForm taskEditing={taskEditing} onCloseForm={this.onCloseForm}/> : '';
     return (
       <div className="container">
       <div className="text-center">
@@ -195,11 +162,11 @@ class App extends Component{
         <hr />
       </div>
       <div className="row">
-        <div className={isDisabled ?"col-xs-4 col-sm-4 col-md-4 col-lg-4" : ''}>
+        <div className={isDisplayForm ?"col-xs-4 col-sm-4 col-md-4 col-lg-4" : ''}>
           {elementTabForm}
         </div>
-        <div className={isDisabled ?"col-xs-8 col-sm-8 col-md-8 col-lg-8" : "col-xs-12 col-sm-12 col-md-12 col-lg-12"} >
-          <button type="button" className="btn btn-primary" onClick={this.toggleTab}>
+        <div className={isDisplayForm ?"col-xs-8 col-sm-8 col-md-8 col-lg-8" : "col-xs-12 col-sm-12 col-md-12 col-lg-12"} >
+          <button type="button" className="btn btn-primary" onClick={this.onToggleForm}>
             <span className="fa fa-plus mr-5"/>Thêm Công Việc
           </button>
           <Control onKeyWord = {this.onKeyWord} onSort = {this.onSort} sortBy = {sort.sortBy} sortValue = {sort.sortValue}/>
@@ -220,4 +187,16 @@ class App extends Component{
   } 
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    isDisplayForm : state.isDisplayForm,
+}
+}
+const mapDispatchToProps = (dispatch,props) => {
+  return {
+    onToggleForm : () => {
+      dispatch(actions.toggleForm())
+    }
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(App);
