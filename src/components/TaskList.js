@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import TaskItem from './TaskItem'
+import  {connect} from 'react-redux';
 
 class TaskList extends Component{
   constructor(props) {
@@ -21,8 +22,9 @@ class TaskList extends Component{
       })
   }
   render(){
+    var {tasks}  =  this.props; //get tasks in store
+
     var {filterName,filterStatus} = this.state;
-    var {tasks}  =  this.props; //B3 : lấy thằng tasks bên app bằng props
     var getTask =  tasks.map( (task, index)=>{
         return <TaskItem 
                   key={task.id} //bắt buộc
@@ -67,4 +69,10 @@ class TaskList extends Component{
   } 
 }
 
-export default TaskList;
+const mapStateToProps = (state) => {// convert state in store to props
+    return {
+        tasks : state.tasks,
+    }
+}
+
+export default connect(mapStateToProps,null)(TaskList);

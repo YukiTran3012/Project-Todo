@@ -22,39 +22,6 @@ class App extends Component{
       }
     }
   }
-  //thêm data lúc đầu
-  // onGenerateData = () => {
-  //   var randomstring = require("randomstring");
-  //   var tasks  = [
-  //     {
-  //       id : randomstring.generate(),
-  //       name : 'Đi bơi',
-  //       status : true,
-  //     },
-  //     {
-  //       id : randomstring.generate(),
-  //       name : 'Lập trình',
-  //       status : true,
-  //     },
-  //     {
-  //       id : randomstring.generate(),
-  //       name : 'Làm bài',
-  //       status : false,
-  //     }
-  //   ]
-  //   this.setState({
-  //     tasks : tasks,
-  //   })
-  //   localStorage.setItem('tasks',JSON.stringify(tasks));
-  // }
-  componentDidMount(){
-    if(localStorage && localStorage.getItem('tasks')) {
-      var tasks = JSON.parse(localStorage.getItem('tasks'));
-      this.setState({
-        tasks : tasks,
-      })
-    }
-  }
   toggleTab = () => {//thêm tab
     if(this.state.isDisabled && this.state.taskEditing !== null){
       this.setState({
@@ -235,17 +202,10 @@ class App extends Component{
           <button type="button" className="btn btn-primary" onClick={this.toggleTab}>
             <span className="fa fa-plus mr-5"/>Thêm Công Việc
           </button>
-          {/* <button
-            type="button"
-            className="btn btn-warning ml-10"
-            onClick={this.onGenerateData}>
-            <span className="fa fa-plus mr-5" />GenerateData
-          </button> */}
           <Control onKeyWord = {this.onKeyWord} onSort = {this.onSort} sortBy = {sort.sortBy} sortValue = {sort.sortValue}/>
           <div className="row mt-15">
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
               <TaskList 
-                tasks={ tasks } 
                 onDeleteInApp={this.onDeleteInApp} 
                 onUpdateDataInApp={ this.onUpdateDataInApp }
                 onUpdateInApp={this.onUpdateInApp}
